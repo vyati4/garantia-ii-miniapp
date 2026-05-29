@@ -1,0 +1,817 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Гарантия ИИ · Претензионная работа</title>
+<meta name="theme-color" content="#17212b">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Гарантия ИИ">
+<link rel="manifest" href="manifest.json">
+<link rel="apple-touch-icon" href="icons/icon-192.png">
+<link rel="icon" type="image/png" href="icons/icon-192.png">
+<script src="https://telegram.org/js/telegram-web-app.js"></script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#17212b;
+  --bg2:#1d2a35;
+  --card:#202b36;
+  --card2:#243240;
+  --line:#2b3a47;
+  --txt:#e9edf0;
+  --muted:#8696a7;
+  --muted2:#6b7d8d;
+  --accent:#8774e1;
+  --accent2:#9d8cf0;
+  --accent-soft:rgba(135,116,225,.16);
+  --green:#4dd07a;
+  --yellow:#f2c14e;
+  --red:#f0635c;
+  --blue:#5ea9f0;
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
+html,body{margin:0;padding:0;}
+body{
+  font-family:'Inter',-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;
+  background:#0e151c;
+  color:var(--txt);
+  font-size:15px;
+  line-height:1.4;
+  display:flex;
+  justify-content:center;
+}
+#app{
+  width:100%;
+  max-width:430px;
+  min-height:100vh;
+  background:var(--bg);
+  position:relative;
+  display:flex;
+  flex-direction:column;
+  box-shadow:0 0 40px rgba(0,0,0,.5);
+  overflow:hidden;
+}
+
+/* ===== HEADER ===== */
+header{
+  background:linear-gradient(180deg,#1f2c38 0%,#1a2731 100%);
+  padding:14px 16px 12px;
+  border-bottom:1px solid var(--line);
+  position:sticky;top:0;z-index:20;
+}
+.hd-top{display:flex;align-items:center;gap:10px;}
+.hd-logo{
+  width:34px;height:34px;border-radius:9px;flex:0 0 auto;
+  background:linear-gradient(135deg,var(--accent),#6f5fd0);
+  display:flex;align-items:center;justify-content:center;
+  font-weight:700;font-size:16px;color:#fff;
+  box-shadow:0 2px 10px rgba(135,116,225,.4);
+}
+.hd-title{font-weight:600;font-size:15px;line-height:1.15;}
+.hd-title small{display:block;font-weight:400;font-size:11px;color:var(--muted);margin-top:2px;}
+/* SLA summary */
+.sla-bar{
+  display:flex;gap:7px;margin-top:11px;
+}
+.sla-pill{
+  flex:1;background:var(--card);border:1px solid var(--line);
+  border-radius:9px;padding:7px 8px;text-align:center;
+}
+.sla-pill .n{font-weight:700;font-size:16px;display:block;line-height:1.1;}
+.sla-pill .l{font-size:9.5px;color:var(--muted);text-transform:uppercase;letter-spacing:.3px;margin-top:2px;}
+.sla-pill.red .n{color:var(--red);}
+.sla-pill.blue .n{color:var(--blue);}
+
+/* ===== MAIN ===== */
+main{flex:1;overflow-y:auto;padding:16px 16px 90px;}
+.screen{display:none;animation:fade .25s ease;}
+.screen.active{display:block;}
+@keyframes fade{from{opacity:0;transform:translateY(6px);}to{opacity:1;transform:none;}}
+
+/* ===== HINT FOOTER ===== */
+.role-foot{text-align:center;color:var(--muted2);font-size:11px;margin-top:10px;line-height:1.5;}
+
+/* ===== SECTION TITLES ===== */
+.sec-h{font-size:13px;color:var(--muted);text-transform:uppercase;letter-spacing:.6px;margin:18px 2px 9px;font-weight:600;}
+.sec-h:first-child{margin-top:2px;}
+
+/* ===== CARD / FORM ===== */
+.card{background:var(--card);border:1px solid var(--line);border-radius:13px;padding:14px;margin-bottom:12px;}
+label.fld{display:block;font-size:12px;color:var(--muted);margin:0 0 6px;font-weight:500;}
+select,textarea,input[type=text]{
+  width:100%;background:var(--bg2);border:1px solid var(--line);color:var(--txt);
+  border-radius:10px;padding:11px 12px;font-size:14px;font-family:inherit;outline:none;resize:none;
+}
+select:focus,textarea:focus,input:focus{border-color:var(--accent);}
+textarea{min-height:74px;}
+.media-row{display:flex;gap:8px;margin:11px 0;}
+.media-btn{
+  flex:1;background:var(--bg2);border:1px solid var(--line);border-radius:10px;
+  padding:13px 6px;text-align:center;cursor:pointer;font-size:12px;color:var(--txt);font-weight:500;transition:.15s;
+}
+.media-btn:active{background:var(--accent-soft);border-color:var(--accent);}
+.media-btn .ic{font-size:21px;display:block;margin-bottom:3px;}
+.media-btn.tagged{border-color:var(--green);color:var(--green);}
+
+.btn{
+  display:block;width:100%;background:var(--accent);color:#fff;border:none;
+  border-radius:11px;padding:13px;font-size:15px;font-weight:600;cursor:pointer;
+  font-family:inherit;transition:.15s;
+}
+.btn:active{transform:scale(.98);background:var(--accent2);}
+.btn.ghost{background:var(--bg2);color:var(--txt);border:1px solid var(--line);}
+.btn.ghost:active{background:var(--card2);}
+.btn.sm{padding:11px;font-size:13.5px;}
+.btn-grid{display:flex;gap:8px;flex-wrap:wrap;margin-top:4px;}
+.btn-grid .btn{flex:1;min-width:calc(50% - 4px);}
+
+/* ===== LIST ITEMS ===== */
+.item{
+  background:var(--card);border:1px solid var(--line);border-radius:13px;padding:13px 14px;
+  margin-bottom:10px;cursor:pointer;transition:.15s;position:relative;
+}
+.item:active{background:var(--card2);}
+.item .top{display:flex;align-items:center;gap:8px;margin-bottom:5px;}
+.item .ttl{font-weight:600;font-size:14.5px;flex:1;}
+.item .date{font-size:11px;color:var(--muted2);white-space:nowrap;}
+.item .desc{font-size:13px;color:var(--muted);line-height:1.45;}
+.badge{font-size:10.5px;padding:3px 8px;border-radius:7px;font-weight:600;white-space:nowrap;}
+.b-new{background:rgba(94,169,240,.18);color:var(--blue);}
+.b-work{background:rgba(242,193,78,.18);color:var(--yellow);}
+.b-done{background:rgba(77,208,122,.18);color:var(--green);}
+.b-over{background:rgba(240,99,92,.2);color:var(--red);}
+
+/* status->step->deadline strip (Standard-2026) */
+.flow{
+  margin-top:8px;font-size:12px;background:var(--bg2);border:1px dashed var(--line);
+  border-radius:9px;padding:8px 10px;line-height:1.55;
+}
+.flow b{color:var(--txt);font-weight:600;}
+.flow .arrow{color:var(--accent2);margin:0 4px;font-weight:700;}
+.flow .dl{color:var(--yellow);font-weight:600;}
+.flow .dl.over{color:var(--red);}
+.sla-dot{font-size:13px;}
+
+/* ===== DETAIL VIEW ===== */
+.back{display:inline-flex;align-items:center;gap:6px;color:var(--accent2);font-size:14px;cursor:pointer;margin-bottom:12px;font-weight:500;}
+.kv{display:flex;justify-content:space-between;gap:10px;padding:8px 0;border-bottom:1px solid var(--line);font-size:13.5px;}
+.kv:last-child{border-bottom:none;}
+.kv .k{color:var(--muted);flex:0 0 auto;}
+.kv .v{text-align:right;font-weight:500;}
+.contractor-box{background:var(--bg2);border:1px solid var(--line);border-left:3px solid var(--accent);border-radius:10px;padding:12px;margin:6px 0 12px;}
+.contractor-box .name{font-weight:600;font-size:14.5px;margin-bottom:6px;}
+.contractor-box .row{font-size:12.5px;color:var(--muted);margin-top:3px;}
+.contractor-box .row b{color:var(--txt);font-weight:500;}
+
+/* generated document */
+.doc{
+  background:#13202b;border:1px solid var(--line);border-radius:11px;padding:14px;margin-top:10px;
+  font-size:12.5px;line-height:1.6;white-space:pre-wrap;color:#cfd9e2;
+  font-family:'Inter',monospace;
+}
+.doc.hidden{display:none;}
+.doc-h{display:flex;align-items:center;gap:7px;font-size:11px;color:var(--accent2);text-transform:uppercase;letter-spacing:.5px;margin-bottom:9px;font-weight:600;}
+
+/* memo */
+.memo{background:var(--accent-soft);border:1px solid rgba(135,116,225,.3);border-radius:11px;padding:12px 14px;margin-top:14px;}
+.memo h4{margin:0 0 7px;font-size:12.5px;color:var(--accent2);}
+.memo .line{display:flex;gap:8px;font-size:13px;margin:5px 0;}
+.memo .line .num{color:var(--accent2);font-weight:700;flex:0 0 auto;}
+
+/* contractor list cards */
+.cn-card{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:13px;margin-bottom:10px;}
+.cn-card .nm{font-weight:600;font-size:14.5px;}
+.cn-card .sec{font-size:11px;color:var(--accent2);background:var(--accent-soft);padding:2px 7px;border-radius:6px;display:inline-block;margin-top:5px;}
+.cn-card .meta{font-size:12px;color:var(--muted);margin-top:7px;line-height:1.5;}
+.warr{font-size:11px;font-weight:600;margin-top:6px;}
+.warr.ok{color:var(--green);}
+.warr.soon{color:var(--yellow);}
+
+/* empty */
+.empty{text-align:center;color:var(--muted2);font-size:13px;padding:30px 10px;}
+
+/* ===== TABBAR ===== */
+.tabbar{
+  position:absolute;bottom:0;left:0;right:0;
+  background:rgba(26,39,49,.97);backdrop-filter:blur(10px);
+  border-top:1px solid var(--line);
+  display:flex;padding:7px 6px calc(7px + env(safe-area-inset-bottom));z-index:20;
+}
+.tabbar.hidden{display:none;}
+.tab{
+  flex:1;text-align:center;padding:5px 2px;cursor:pointer;color:var(--muted2);font-size:10.5px;font-weight:500;transition:.15s;
+}
+.tab .ic{font-size:19px;display:block;margin-bottom:2px;}
+.tab.active{color:var(--accent2);}
+
+/* toast */
+#toast{
+  position:absolute;bottom:80px;left:50%;transform:translateX(-50%) translateY(20px);
+  background:#2b3a47;color:#fff;padding:10px 16px;border-radius:10px;font-size:13px;
+  opacity:0;pointer-events:none;transition:.3s;z-index:50;box-shadow:0 4px 18px rgba(0,0,0,.4);
+  border:1px solid var(--line);max-width:80%;text-align:center;
+}
+#toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
+</style>
+</head>
+<body>
+<div id="app">
+
+  <!-- HEADER -->
+  <header>
+    <div class="hd-top">
+      <div class="hd-logo">Г</div>
+      <div class="hd-title">Гарантия ИИ
+        <small id="hdSub">Претензионная работа · отдел гарантии ГК «Железно»</small>
+      </div>
+    </div>
+    <div class="sla-bar">
+      <div class="sla-pill"><span class="n">7</span><span class="l">Открытых</span></div>
+      <div class="sla-pill red"><span class="n">🔴 2</span><span class="l">Просрочка</span></div>
+      <div class="sla-pill blue"><span class="n">📅 3</span><span class="l">На сегодня</span></div>
+    </div>
+  </header>
+
+  <!-- MAIN -->
+  <main id="main">
+
+    <!-- ===== SCREEN: GR — REQUESTS (стартовый экран) ===== -->
+
+    <!-- ===== SCREEN: DEFECT — NEW NOTE ===== -->
+    <section class="screen" id="s-sk-new">
+      <div class="sec-h">🛠 Фиксация дефекта · Новое замечание</div>
+      <div class="card">
+        <label class="fld">Квартира</label>
+        <select id="skFlat">
+          <optgroup label="Дом 1">
+            <option>Дом 1 · кв. 12</option>
+            <option>Дом 1 · кв. 44</option>
+          </optgroup>
+          <optgroup label="Дом 2">
+            <option>Дом 2 · кв. 16</option>
+            <option selected>Дом 2 · кв. 92</option>
+          </optgroup>
+          <optgroup label="Дом 3">
+            <option>Дом 3 · кв. 7</option>
+            <option>Дом 3 · кв. 103</option>
+          </optgroup>
+          <optgroup label="Дом 4.1">
+            <option>Дом 4.1 · кв. 28</option>
+            <option>Дом 4.1 · кв. 55</option>
+          </optgroup>
+        </select>
+
+        <div class="media-row" style="margin-top:13px;">
+          <div class="media-btn" id="mbPhoto" onclick="tagMedia('mbPhoto','📷 Фото · 2')"><span class="ic">📷</span>Фото</div>
+          <div class="media-btn" id="mbVoice" onclick="tagMedia('mbVoice','🎤 Голос · 0:14')"><span class="ic">🎤</span>Голос</div>
+        </div>
+
+        <label class="fld">Описание дефекта</label>
+        <textarea id="skText" placeholder="трещина на потолке…"></textarea>
+
+        <button class="btn" style="margin-top:12px;" onclick="saveNote()">Сохранить замечание</button>
+      </div>
+      <div class="role-foot" style="margin-top:4px;">🎤 Скрайбер расшифрует голос в черновик · 📷 мультизагрузка фото</div>
+    </section>
+
+    <!-- ===== SCREEN: DEFECT — HISTORY ===== -->
+    <section class="screen" id="s-sk-hist">
+      <div class="sec-h">🛠 Фиксация дефекта · История замечаний</div>
+      <div id="skList"></div>
+    </section>
+
+    <!-- ===== SCREEN: GR — REQUESTS (стартовый) ===== -->
+    <section class="screen active" id="s-gr-list">
+      <div class="sec-h">📋 Заявки · Стандарт 2026</div>
+      <div id="grList"></div>
+    </section>
+
+    <!-- ===== SCREEN: GR — REQUEST DETAIL ===== -->
+    <section class="screen" id="s-gr-detail">
+      <div class="back" onclick="show('s-gr-list')">‹ К заявкам</div>
+      <div id="grDetail"></div>
+    </section>
+
+    <!-- ===== SCREEN: GR — CONTRACTORS ===== -->
+    <section class="screen" id="s-gr-contractors">
+      <div class="sec-h">👷 База подрядчиков</div>
+      <div id="cnList"></div>
+    </section>
+
+    <!-- ===== SCREEN: GR — ACTS ===== -->
+    <section class="screen" id="s-gr-acts">
+      <div class="sec-h">📄 Акты</div>
+      <div class="memo" style="margin-top:0;">
+        <h4>⚠️ Узкое место процесса</h4>
+        <div style="font-size:13px;color:var(--muted);line-height:1.5;">Отсутствие актов осмотра/дефектов на руках тормозит и претензии, и общение с клиентом. Формируется в один тап из карточки заявки.</div>
+      </div>
+      <div id="actList" style="margin-top:12px;"></div>
+    </section>
+
+  </main>
+
+  <!-- TABBAR -->
+  <div class="tabbar" id="tabbar"></div>
+
+  <div id="toast"></div>
+</div>
+
+<script>
+/* ============ TELEGRAM WEBAPP ============ */
+const tg = (window.Telegram && window.Telegram.WebApp) ? window.Telegram.WebApp : null;
+const initData = tg ? tg.initData : '';
+if (tg) {
+  tg.ready();
+  tg.expand();
+  // Синк темы из Telegram-клиента (если отдаёт themeParams) — иначе остаётся захардкоженная тёмная
+  const tp = tg.themeParams || {};
+  const root = document.documentElement.style;
+  if (tp.bg_color)            root.setProperty('--bg', tp.bg_color);
+  if (tp.secondary_bg_color)  root.setProperty('--card', tp.secondary_bg_color);
+  if (tp.text_color)          root.setProperty('--txt', tp.text_color);
+  if (tp.hint_color)          root.setProperty('--muted', tp.hint_color);
+  if (tp.button_color)        root.setProperty('--accent', tp.button_color);
+  if (tp.link_color)          root.setProperty('--accent2', tp.link_color);
+}
+
+/* ============ API LAYER (fetch с фолбэком на demo) ============ */
+// На проде данные тянутся из FastAPI; без бэка падаем на DEMO_* — прототип работает автономно.
+const API_BASE = '/api';
+async function apiGet(path, fallback) {
+  try {
+    const res = await fetch(API_BASE + path, { headers: { 'X-Telegram-Init-Data': initData } });
+    if (!res.ok) throw new Error('HTTP ' + res.status);
+    return await res.json();
+  } catch (e) {
+    console.warn('[api] GET ' + path + ' → demo-фолбэк:', e.message);
+    return fallback;
+  }
+}
+async function apiPost(path, body) {
+  const res = await fetch(API_BASE + path, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', 'X-Telegram-Init-Data': initData },
+    body: JSON.stringify(body || {}),
+  });
+  if (res.status === 429) {
+    const err = new Error('limit');
+    err.code = 429;
+    err.payload = await res.json().catch(() => ({}));
+    throw err;
+  }
+  if (!res.ok) throw new Error('HTTP ' + res.status);
+  return await res.json();
+}
+async function loadData() {
+  const [reqs, cons, acts, notes] = await Promise.all([
+    apiGet('/requests', DEMO_REQUESTS),
+    apiGet('/contractors', DEMO_CONTRACTORS),
+    apiGet('/acts', DEMO_ACTS),
+    apiGet('/notes', DEMO_NOTES),
+  ]);
+  REQUESTS = reqs; CONTRACTORS = cons; ACTS = acts; NOTES = notes;
+  renderRequests(); renderContractors(); renderActs(); renderNotes();
+}
+
+/* ============ DEMO DATA (фолбэк, если бэкенд недоступен) ============ */
+
+// Фиксация дефекта — история замечаний (реальные, кв.92)
+const DEMO_NOTES = [
+  {flat:"Дом 2 · кв. 92", date:"22.05.2026", status:"work",
+   text:"Усадочная трещина на пилоне, отслоение штукатурки в санузле ~4 м², продувание окон, не подключён ГВС"},
+  {flat:"Дом 2 · кв. 92", date:"22.05.2026", status:"new",
+   text:"Непрокрас обоев, трещина стыка ламината"},
+  {flat:"Дом 2 · кв. 16", date:"18.05.2026", status:"over",
+   text:"Гарантийный ремонт не выполнен 4 мес. (дольщик Д. А.) — эскалация на руководство"},
+];
+
+// ИИ Гарантия — заявки (Стандарт-2026: статус → шаг → срок)
+const DEMO_REQUESTS = [
+  {id:"ГО-001/2026", flat:"кв. 92", section:"Кровля", sla:"yellow",
+   status:"Передано подрядчику", step:"ждём ответ", dl:"до 01.06", dlNote:"3 дн", over:false,
+   defect:"Усадочная трещина на пилоне, протечка по примыканию кровли над кв.92",
+   contractor:{name:"ИП Филиппов А.В.", dogovor:"119-ЕК от 14.03.2025", email:"filippov-stroy@mail.ru", phone:"+7 343 318-04-19", warr:"до 25.04.2028", warrState:"ok", section:"Кровля"}},
+  {id:"ГО-002/2026", flat:"кв. 16", section:"Базовая отделка", sla:"red",
+   status:"Просрочка ответа", step:"эскалация → руководитель", dl:"просрочено 4 мес", dlNote:"ур.2", over:true,
+   defect:"Гарантийный ремонт чистовой отделки не выполнен (кейс дольщика Д. А.)",
+   contractor:{name:"Сервис Строй", dogovor:"57-СО от 02.11.2024", email:"servis-stroy@bk.ru", phone:"+7 343 290-11-55", warr:"до 02.11.2027", warrState:"ok", section:"Базовая отделка"}},
+  {id:"ГО-003/2026", flat:"кв. 92", section:"Окна ПВХ", sla:"green",
+   status:"Подрядчик подтвердил", step:"совместный осмотр", dl:"до 04.06", dlNote:"10 дн", over:false,
+   defect:"Продувание оконных блоков, разрегулировка створок",
+   contractor:{name:"ПВХ-Мастер Урал", dogovor:"45-О/2024 от 20.04.2024", email:"pvh-master66@yandex.ru", phone:"+7 343 222-33-44", warr:"до 14.06.2027", warrState:"ok", section:"Окна ПВХ"}},
+  {id:"ГО-004/2026", flat:"кв. 7", section:"Лифты", sla:"yellow",
+   status:"Сформирован акт осмотра", step:"направить претензию", dl:"до 31.05", dlNote:"сегодня", over:false,
+   defect:"Сбой автоматики двери лифта, рывки при остановке",
+   contractor:{name:"ОТИС-Урал", dogovor:"78-Л/2023 от 10.12.2023", email:"otis-ural@otis.com", phone:"+7 343 555-77-88", warr:"до 31.08.2026", warrState:"soon", section:"Лифты"}},
+];
+
+// Подрядчики (база)
+const DEMO_CONTRACTORS = [
+  {nm:"ИП Филиппов А.В.", sec:"Кровля", dog:"119-ЕК от 14.03.2025", ph:"+7 343 318-04-19", em:"filippov-stroy@mail.ru", warr:"до 25.04.2028", ws:"ok"},
+  {nm:"ООО СтройКровля", sec:"Кровля", dog:"12-К/2024 от 15.03.2024", ph:"+7 343 123-45-67", em:"stroykrovlya@mail.ru", warr:"до 10.07.2026", ws:"soon", contact:"Иванов И.И."},
+  {nm:"ПВХ-Мастер Урал", sec:"Окна ПВХ", dog:"45-О/2024 от 20.04.2024", ph:"+7 343 222-33-44", em:"pvh-master66@yandex.ru", warr:"до 14.06.2027", ws:"ok", contact:"Петров П.П."},
+  {nm:"ОТИС-Урал", sec:"Лифты", dog:"78-Л/2023 от 10.12.2023", ph:"+7 343 555-77-88", em:"otis-ural@otis.com", warr:"до 31.08.2026", ws:"soon", contact:"Сидорова М.А."},
+  {nm:"Сервис Строй", sec:"Базовая отделка", dog:"57-СО от 02.11.2024", ph:"+7 343 290-11-55", em:"servis-stroy@bk.ru", warr:"до 02.11.2027", ws:"ok"},
+  {nm:"ООО РемСтрой", sec:"Прочее (заглушка)", dog:"99-Р/2024", ph:"+7 343 999-88-77", em:"remstroy@mail.ru", warr:"до 01.01.2027", ws:"ok", contact:"Кузнецов К.К."},
+];
+
+// Акты
+const DEMO_ACTS = [
+  {id:"АО-004/2026", title:"Акт осмотра · кв.7 Лифты", date:"29.05.2026", status:"done", req:"ГО-004/2026"},
+  {id:"АД-001/2026", title:"Акт дефектов · кв.92 Кровля", date:"в работе", status:"work", req:"ГО-001/2026"},
+];
+
+// Рабочие копии — стартуют от demo, обновляются loadData() из API при наличии бэка
+let NOTES = DEMO_NOTES.slice();
+let REQUESTS = DEMO_REQUESTS.slice();
+let CONTRACTORS = DEMO_CONTRACTORS.slice();
+let ACTS = DEMO_ACTS.slice();
+
+/* ============ STATE / NAV ============ */
+// МВП «Гарантия ИИ» — без ролей. Единый таб-бар: заявки/подрядчики/акты/дефект.
+// Карточка заявки (s-gr-detail) относится к вкладке «Заявки».
+const TABS = [
+  {ic:"📋",label:"Заявки",screen:"s-gr-list",match:["s-gr-list","s-gr-detail"]},
+  {ic:"👷",label:"Подрядчики",screen:"s-gr-contractors"},
+  {ic:"📄",label:"Акты",screen:"s-gr-acts"},
+  {ic:"🛠",label:"Дефект",screen:"s-sk-new",match:["s-sk-new","s-sk-hist"]},
+];
+
+function show(id){
+  document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+  document.getElementById('main').scrollTop=0;
+  syncTabs(id);
+}
+
+function syncTabs(id){
+  document.querySelectorAll('.tab').forEach(t=>{
+    const m=(t.dataset.match||t.dataset.screen||'').split(',');
+    t.classList.toggle('active', m.includes(id));
+  });
+}
+
+function buildTabbar(){
+  const bar=document.getElementById('tabbar');
+  bar.innerHTML=TABS.map(t=>{
+    const match=(t.match||[t.screen]).join(',');
+    return '<div class="tab" data-screen="'+t.screen+'" data-match="'+match+'" onclick="show(\''+t.screen+'\')">'+
+      '<span class="ic">'+t.ic+'</span>'+t.label+'</div>';
+  }).join('');
+}
+
+/* ============ RENDER: SK HISTORY ============ */
+const BADGE={new:['b-new','Новое'],work:['b-work','В работе'],done:['b-done','Закрыто'],over:['b-over','Просрочка']};
+function badge(st){const b=BADGE[st];return '<span class="badge '+b[0]+'">'+b[1]+'</span>';}
+
+function renderNotes(){
+  const el=document.getElementById('skList');
+  if(!NOTES.length){el.innerHTML='<div class="empty">Пока нет замечаний</div>';return;}
+  el.innerHTML=NOTES.map(n=>(
+    '<div class="item">'+
+      '<div class="top"><div class="ttl">'+n.flat+'</div>'+badge(n.status)+'<div class="date">'+n.date+'</div></div>'+
+      '<div class="desc">'+n.text+'</div>'+
+    '</div>'
+  )).join('');
+}
+
+/* ============ RENDER: GR REQUESTS ============ */
+const SLADOT={green:'🟢',yellow:'🟡',red:'🔴'};
+function renderRequests(){
+  const el=document.getElementById('grList');
+  el.innerHTML=REQUESTS.map((r,i)=>{
+    const dlCls=r.over?' over':'';
+    return '<div class="item" onclick="openReq('+i+')">'+
+      '<div class="top"><div class="ttl">'+r.id+' · '+r.flat+' '+r.section+'</div></div>'+
+      '<div class="flow"><span class="sla-dot">'+SLADOT[r.sla]+'</span> <b>'+r.status+'</b>'+
+        '<span class="arrow">→</span>'+r.step+
+        '<span class="arrow">→</span><span class="dl'+dlCls+'">'+r.dl+' ('+r.dlNote+')</span></div>'+
+    '</div>';
+  }).join('');
+}
+
+/* ============ RENDER: GR DETAIL ============ */
+function openReq(i){
+  const r=REQUESTS[i];
+  const c=r.contractor;
+  const dlCls=r.over?' over':'';
+  const wCls=c.warrState==='ok'?'ok':'soon';
+  const wTxt=(c.warrState==='ok'?'✅ Гарантия действует ':'🟡 Гарантия истекает ')+c.warr;
+  document.getElementById('grDetail').innerHTML=
+    '<div class="sec-h" style="margin-top:0;">'+r.id+' · '+r.flat+' '+r.section+'</div>'+
+    '<div class="card">'+
+      '<div class="flow" style="margin-top:0;margin-bottom:12px;"><span class="sla-dot">'+SLADOT[r.sla]+'</span> <b>'+r.status+'</b>'+
+        '<span class="arrow">→</span>'+r.step+'<span class="arrow">→</span><span class="dl'+dlCls+'">'+r.dl+' ('+r.dlNote+')</span></div>'+
+      '<div class="kv"><span class="k">Дефект</span><span class="v">'+r.defect+'</span></div>'+
+      '<div class="kv"><span class="k">Объект</span><span class="v">'+r.flat+' · '+r.section+'</span></div>'+
+    '</div>'+
+
+    '<div class="sec-h">Подобранный подрядчик</div>'+
+    '<div class="contractor-box">'+
+      '<div class="name">'+c.name+'</div>'+
+      '<div class="row">Раздел: <b>'+c.section+'</b></div>'+
+      '<div class="row">Договор: <b>'+c.dogovor+'</b></div>'+
+      '<div class="row">Email: <b>'+c.email+'</b> · '+c.phone+'</div>'+
+      '<div class="warr '+wCls+'">'+wTxt+'</div>'+
+    '</div>'+
+
+    '<div class="btn-grid">'+
+      '<button class="btn ghost sm" onclick="genDoc(\'act\','+i+')">📄 Акт осмотра</button>'+
+      '<button class="btn ghost sm" onclick="genDoc(\'claim\','+i+')">✉️ Претензия</button>'+
+      '<button class="btn ghost sm" style="min-width:100%;" onclick="genDoc(\'sla\','+i+')">⏱ Контроль срока</button>'+
+    '</div>'+
+
+    '<button class="btn sm" style="margin-top:8px;" onclick="sendPackage('+i+')">📎 Собрать пакет в Telegram</button>'+
+
+    '<div class="doc hidden" id="docOut"></div>';
+  show('s-gr-detail');
+}
+
+/* ============ ПРАВОВАЯ БАЗА: маппинг раздел → нормы ============ */
+// Реквизиты застройщика (для шапки документов)
+const ZASTROYSCHIK = {
+  name:'ООО Специализированный застройщик «Железно Регион»',
+  short:'ООО СЗ «Железно Регион»',
+  city:'г. Екатеринбург',
+  engineer:'Ведущий инженер ОГС, Пьянков М. · ГК «Железно», г. Екатеринбург',
+};
+
+// Базовый блок ГК РФ / 214-ФЗ / ЗоЗПП — общий для всех разделов
+const NORM_BASE = [
+  'ст. 7 Федерального закона от 30.12.2004 № 214-ФЗ (гарантийные обязательства застройщика: не менее 5 лет на объект, не менее 3 лет на инженерное и технологическое оборудование)',
+  'ст. 469, 475, 477 ГК РФ (требования к качеству, последствия передачи товара ненадлежащего качества, гарантийный срок)',
+  'ст. 721, 723, 754, 755, 756 ГК РФ (качество работ подрядчика, ответственность за ненадлежащее качество, гарантия качества работ)',
+  'ст. 18, 29 Закона РФ от 07.02.1992 № 2300-1 «О защите прав потребителей» (при предъявлении требований участником долевого строительства)',
+];
+
+// Профильные СП / ГОСТ / ТР ТС — подбираются по разделу заявки (захардкоженный маппинг)
+// Ключи нормализованы к разделам REQUESTS (section).
+const NORM_SECTION = {
+  'Кровля':[
+    'СП 17.13330.2017 «Кровли» (актуализированная редакция СНиП II-26-76) — требования к водонепроницаемости и устройству кровельных покрытий',
+    'СП 71.13330.2017 «Изоляционные и отделочные покрытия» — в части примыканий и гидроизоляции',
+  ],
+  'Окна ПВХ':[
+    'ГОСТ 30674-2023 «Блоки оконные из поливинилхлоридных профилей» (ранее ГОСТ 30674-99) — герметичность, сопротивление воздухопроницанию',
+    'ГОСТ 23166-2021 «Конструкции оконные и балконные. Общие технические условия»',
+    'ГОСТ 30971-2012 «Швы монтажные узлов примыкания оконных блоков к стеновым проёмам»',
+  ],
+  'Базовая отделка':[
+    'СП 71.13330.2017 «Изоляционные и отделочные покрытия» (актуализированная редакция СНиП 3.04.01-87) — требования к штукатурным и отделочным работам',
+    'СП 29.13330.2011 «Полы» — в части стяжки и напольных покрытий',
+  ],
+  'Лифты':[
+    'ТР ТС 011/2011 «Безопасность лифтов» — требования к безопасности и эксплуатации лифтового оборудования',
+    'ГОСТ Р 53780-2010 (ЕН 81-1:1998, ЕН 81-2:1998) «Лифты. Общие требования безопасности к устройству и установке»',
+    'ГОСТ Р 55964-2014 «Лифты. Общие требования безопасности при эксплуатации»',
+  ],
+};
+
+// Пункты договора подряда, на которые ссылается претензия/акт (типовые гарантийные пункты)
+const DOG_CLAUSES = {
+  warranty:'п. 6.2 договора подряда — гарантийные обязательства подрядчика',
+  term:'п. 7.1 договора подряда — срок устранения недостатков, выявленных в гарантийный период',
+  penalty:'п. 9.3 договора подряда — неустойка (пеня) за нарушение срока устранения недостатков',
+};
+
+// Гарантийный контекст 214-ФЗ по разделу (5 лет / 3 года / отделка)
+function warrCtx(section){
+  if(section==='Лифты') return 'инженерное (лифтовое) оборудование — гарантийный срок не менее 3 лет (ч. 5.1 ст. 7 ФЗ-214)';
+  if(section==='Базовая отделка') return 'конструктив объекта — гарантийный срок не менее 5 лет (ч. 5 ст. 7 ФЗ-214)';
+  return 'объект долевого строительства — гарантийный срок не менее 5 лет (ч. 5 ст. 7 ФЗ-214)';
+}
+
+// Собрать список норм для раздела: профильные + базовые
+function normsFor(section){
+  const spec=NORM_SECTION[section]||['профильные строительные нормы и правила (СП/ГОСТ) по разделу работ'];
+  return spec.concat(NORM_BASE);
+}
+
+// Отрендерить нумерованный перечень норм с переносами
+function numberedList(arr, indent){
+  indent=indent||'';
+  return arr.map((s,idx)=>indent+(idx+1)+'. '+s).join('\n');
+}
+
+/* ============ GENERATED DOCS ============ */
+function genDoc(type,i){
+  const r=REQUESTS[i], c=r.contractor;
+  const out=document.getElementById('docOut');
+  const today='29.05.2026';
+  const norms=normsFor(r.section);
+  let head='', body='';
+  if(type==='claim'){
+    head='✉️ ПРЕТЕНЗИЯ (УВЕДОМЛЕНИЕ) ПОДРЯДЧИКУ · черновик';
+    body=
+'Исх. № ПР-'+r.id.split('/')[0].replace('ГО-','')+'/'+today.slice(6)+' от '+today+'\n'+
+'Кому: '+c.name+' (по договору подряда № '+c.dogovor+')\n'+
+'Email (по договору): '+c.email+' · '+c.phone+'\n'+
+'От: '+ZASTROYSCHIK.name+', '+ZASTROYSCHIK.city+'\n'+
+'══════════════════════════════════════\n'+
+'ПРЕТЕНЗИЯ\n'+
+'об устранении недостатков, выявленных в пределах\n'+
+'гарантийного срока\n'+
+'(заявка '+r.id+'; объект: '+r.flat+'; раздел «'+r.section+'»)\n\n'+
+'Настоящим '+ZASTROYSCHIK.short+' (далее — Застройщик)\n'+
+'уведомляет '+c.name+' (далее — Подрядчик) о том, что\n'+
+'в пределах гарантийного срока (гарантия по договору\n'+
+'действует '+c.warr+') в результате осмотра объекта\n'+
+'выявлен недостаток выполненных Подрядчиком работ:\n'+
+'  «'+r.defect+'».\n\n'+
+'ПРАВОВОЕ ОБОСНОВАНИЕ.\n'+
+'Выявленный недостаток является гарантийным случаем.\n'+
+'Применимо: '+warrCtx(r.section)+'.\n\n'+
+'1. По договору подряда:\n'+
+'   • '+DOG_CLAUSES.warranty+';\n'+
+'   • '+DOG_CLAUSES.term+';\n'+
+'   • '+DOG_CLAUSES.penalty+'.\n\n'+
+'2. По нормативным актам и профильным нормам\n'+
+'   (раздел «'+r.section+'»):\n'+
+numberedList(norms,'   ')+'\n\n'+
+'3. По внутренним документам ГК «Железно»:\n'+
+'   • Регламент «Гарантийные обязательства» (2025),\n'+
+'     п. 5.4 — порядок претензионной работы\n'+
+'     с подрядчиком и перевыставления затрат;\n'+
+'   • Стандарт клиентского сервиса 2026 — сроки SLA.\n\n'+
+'ТРЕБОВАНИЯ.\n'+
+'В соответствии с вышеизложенным ТРЕБУЕМ:\n'+
+'  1) в течение 3 (трёх) рабочих дней с даты получения\n'+
+'     настоящей претензии — направить письменный ответ\n'+
+'     и обеспечить явку уполномоченного представителя\n'+
+'     на совместный (комиссионный) осмотр;\n'+
+'  2) безвозмездно устранить выявленный недостаток\n'+
+'     в срок, установленный договором ('+DOG_CLAUSES.term.replace(' договора подряда','')+'),\n'+
+'     но не позднее 10 (десяти) дней с даты осмотра.\n\n'+
+'ПОСЛЕДСТВИЯ БЕЗДЕЙСТВИЯ.\n'+
+'В случае неявки представителя либо немотивированного\n'+
+'отказа от устранения недостатков в установленный срок\n'+
+'Застройщик оставляет за собой право:\n'+
+'  • составить акт выявленных дефектов в одностороннем\n'+
+'    порядке (с отметкой о неявке Подрядчика);\n'+
+'  • начислить неустойку (пеню) по договору ('+'п. 9.3'+');\n'+
+'  • устранить недостатки силами третьего лица с после-\n'+
+'    дующим перевыставлением затрат (п. 5.4 Регламента);\n'+
+'  • инициировать претензионно-судебную работу\n'+
+'    (ст. 723, 755 ГК РФ).\n\n'+
+'Приложения: заявка из ПО «Мажордом»; акт выявленных\n'+
+'дефектов при первичном осмотре; договор подряда\n'+
+'№ '+c.dogovor+'; акты КС-2, КС-3; фото-видеофиксация.\n\n'+
+ZASTROYSCHIK.engineer+'\n'+
+'_______________ / подпись, дата\n\n'+
+'[ПДн дольщика обезличены по ФЗ-152: [КЛИЕНТ], [АДРЕС дом N]]';
+  } else if(type==='act'){
+    head='📄 АКТ ВЫЯВЛЕННЫХ ДЕФЕКТОВ · черновик';
+    body=
+'АКТ\nвыявленных дефектов объекта долевого строительства\n'+
+'№ АО-'+r.id.split('/')[0].replace('ГО-','')+'/'+today.slice(6)+'\n'+
+ZASTROYSCHIK.city+'        «29» мая 2026 г.\n'+
+'══════════════════════════════════════\n'+
+'Тип обследования: первичный осмотр выявленных дефектов.\n'+
+'Объект: '+r.flat+', раздел «'+r.section+'».\n'+
+'Основание: заявка '+r.id+' (ПО «Мажордом»).\n\n'+
+'СОСТАВ КОМИССИИ:\n'+
+'  • Представитель застройщика: '+ZASTROYSCHIK.short+',\n'+
+'    ведущий инженер ОГС Пьянков М.;\n'+
+'  • Представитель подрядчика: '+c.name+'\n'+
+'    (договор подряда № '+c.dogovor+');\n'+
+'  • Собственник / дольщик: [КЛИЕНТ].\n\n'+
+'ГАРАНТИЙНЫЙ КОНТЕКСТ.\n'+
+'Гарантия по договору действует '+c.warr+'.\n'+
+'Применимо: '+warrCtx(r.section)+';\n'+
+DOG_CLAUSES.warranty+'.\n\n'+
+'РЕЗУЛЬТАТЫ ОСМОТРА. При осмотре установлено:\n'+
+'  • '+r.defect+'.\n\n'+
+'ЗАКЛЮЧЕНИЕ КОМИССИИ.\n'+
+'Выявленный недостаток отнесён к гарантийным\n'+
+'обязательствам подрядчика. Несоответствие требованиям:\n'+
+numberedList(norms.slice(0,3),'   ')+'\n'+
+'Срок устранения — согласно '+DOG_CLAUSES.term.replace(' договора подряда','')+',\n'+
+'но не более 45 дней (норматив устранения, кроме сезонных).\n\n'+
+'ОГОВОРКА. Подрядчик, уведомлённый надлежащим образом,\n'+
+'при неявке на осмотр считается уклонившимся; акт\n'+
+'составляется Заказчиком в одностороннем порядке\n'+
+'(ст. 720 ГК РФ).\n\n'+
+'Приложения: фотофиксация (2 фото), голос-замечание;\n'+
+'копия доверенности представителя подрядчика.\n\n'+
+'ПОДПИСИ СТОРОН:\n'+
+'  Представитель застройщика ___________ / Пьянков М. (вед. инженер ОГС)\n'+
+'  Представитель подрядчика  ___________ / (или «от явки уклонился»)\n'+
+'  Собственник [КЛИЕНТ]      ___________ /\n\n'+
+'Члены комиссии предупреждены об ответственности\n'+
+'за подписание акта с недостоверными данными.';
+  } else {
+    head='⏱ КОНТРОЛЬ СРОКА (SLA)';
+    body=
+'Заявка '+r.id+' · '+r.flat+' '+r.section+'\n'+
+'──────────────────────────────\n'+
+SLADOT[r.sla]+' Текущий статус: '+r.status+'\n'+
+'Следующий шаг:  '+r.step+'\n'+
+'Срок:           '+r.dl+' ('+r.dlNote+')\n\n'+
+'Регламент SLA (Стандарт клиентского сервиса 2026,\n'+
+'Регламент «Гарантийные обязательства» п. 5.3–5.4):\n'+
+'  • Ответ подрядчика ..... 3 дня\n'+
+'  • Устранение ........... 10 дней\n'+
+'  • Срок клиенту ......... 30–45 дней\n\n'+
+(r.over
+ ? '🔴 СРОК НАРУШЕН → авто-эскалация на уровень 2\n   (руководитель отдела — К. Павлович).'
+ : '🔔 Проактивный пуш уйдёт за 1 день до срыва срока\n   (компания узнаёт о риске раньше клиента).');
+  }
+  out.innerHTML='<div class="doc-h">'+head+'</div>'+body;
+  out.classList.remove('hidden');
+  out.scrollIntoView({behavior:'smooth',block:'nearest'});
+}
+
+/* ============ RENDER: CONTRACTORS ============ */
+function renderContractors(){
+  const el=document.getElementById('cnList');
+  el.innerHTML=CONTRACTORS.map(c=>{
+    const wCls=c.ws==='ok'?'ok':'soon';
+    const wTxt=(c.ws==='ok'?'✅ гарантия ':'🟡 истекает ')+c.warr;
+    return '<div class="cn-card">'+
+      '<div class="nm">'+c.nm+'</div>'+
+      '<span class="sec">'+c.sec+'</span>'+
+      '<div class="meta">'+(c.contact?('Контакт: '+c.contact+'<br>'):'')+
+        'Договор: '+c.dog+'<br>'+c.em+' · '+c.ph+'</div>'+
+      '<div class="warr '+wCls+'">'+wTxt+'</div>'+
+    '</div>';
+  }).join('');
+}
+
+/* ============ RENDER: ACTS ============ */
+function renderActs(){
+  const el=document.getElementById('actList');
+  el.innerHTML=ACTS.map(a=>(
+    '<div class="item">'+
+      '<div class="top"><div class="ttl">'+a.title+'</div>'+badge(a.status)+'</div>'+
+      '<div class="desc">'+a.id+' · '+a.date+' · заявка '+a.req+'</div>'+
+    '</div>'
+  )).join('');
+}
+
+/* ============ ACTIONS ============ */
+function tagMedia(id,label){
+  const b=document.getElementById(id);
+  b.classList.toggle('tagged');
+  // visual hint only
+  toast(b.classList.contains('tagged')?(label+' прикреплено'):'Вложение убрано');
+}
+
+/* Собрать пакет документов по заявке и отправить в Telegram (ключевая фича, §3 плана) */
+async function sendPackage(i){
+  const r=REQUESTS[i];
+  toast('📎 Собираю пакет по '+r.id+'…');
+  try{
+    const res=await apiPost('/package/'+encodeURIComponent(r.id),{});
+    toast('✅ Пакет ('+(res.count||'?')+' файлов) отправлен в Telegram');
+  }catch(e){
+    if(e.code===429){
+      toast('⛔ Лимит генераций на сегодня исчерпан. Сброс в 00:00 (Екб).');
+    }else{
+      toast('⚠️ Demo-режим: бэкенд не подключён, на проде пакет уйдёт в чат');
+    }
+  }
+}
+
+function saveNote(){
+  const flat=document.getElementById('skFlat').value;
+  const text=document.getElementById('skText').value.trim();
+  if(!text){toast('Введите описание дефекта');return;}
+  const now=new Date();
+  const dd=String(now.getDate()).padStart(2,'0')+'.'+String(now.getMonth()+1).padStart(2,'0')+'.'+now.getFullYear();
+  NOTES.unshift({flat,date:dd,status:'new',text});
+  renderNotes();
+  document.getElementById('skText').value='';
+  document.getElementById('mbPhoto').classList.remove('tagged');
+  document.getElementById('mbVoice').classList.remove('tagged');
+  toast('✅ Замечание сохранено в Историю');
+  show('s-sk-hist');
+}
+
+let toastT;
+function toast(msg){
+  const t=document.getElementById('toast');
+  t.textContent=msg;t.classList.add('show');
+  clearTimeout(toastT);
+  toastT=setTimeout(()=>t.classList.remove('show'),1900);
+}
+
+/* ============ INIT ============ */
+renderNotes();
+renderRequests();
+renderContractors();
+renderActs();
+buildTabbar();
+show('s-gr-list'); // МВП открывается сразу на списке заявок
+loadData();        // обновит данные из API, если бэкенд доступен (иначе остаётся demo)
+
+// PWA: офлайн-оболочка + Add to Home Screen
+if ('serviceWorker' in navigator) {
+  navigator.serviceWorker.register('service-worker.js').catch(e=>console.warn('SW не зарегистрирован:', e.message));
+}
+</script>
+</body>
+</html>
