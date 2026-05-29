@@ -400,6 +400,20 @@ textarea{min-height:74px;}
           <li>Открыть приложение: кнопка <b>«Гарантия ИИ»</b> внизу чата с ботом.</li>
         </ul>
       </div>
+      <div class="card">
+        <div class="sec-h" style="margin-top:0;">📲 Вывести на iPhone как приложение</div>
+        <div style="display:flex;gap:8px;align-items:center;margin-bottom:12px;">
+          <input id="appLink" type="text" readonly value="https://vyati4.github.io/garantia-ii-miniapp/" onclick="this.select()">
+          <button class="btn sm" style="width:auto;padding:11px 14px;white-space:nowrap;" onclick="copyAppLink()">Копировать</button>
+        </div>
+        <ol class="instr" style="padding-left:18px;margin:0;">
+          <li>Откройте ссылку выше в <b>Safari</b> (именно Safari, не Chrome).</li>
+          <li>Нажмите кнопку <b>«Поделиться»</b> (квадрат со стрелкой ↑) внизу экрана.</li>
+          <li>Прокрутите и выберите <b>«На экран «Домой»»</b>.</li>
+          <li>Нажмите <b>«Добавить»</b> — иконка «Гарантия ИИ» появится на рабочем столе.</li>
+        </ol>
+        <div style="margin-top:9px;color:var(--muted2);font-size:12px;line-height:1.5;">Открывается на весь экран, как обычное приложение — без App Store. На Android: откройте ссылку в Chrome → меню «⋮» → «Установить приложение».</div>
+      </div>
     </section>
 
   </main>
@@ -1006,6 +1020,11 @@ function renderSettings(){
 function setTheme(name){ applyTheme(name); saveSettings(); renderSettings(); }
 function setFont(size){ applyFont(size); saveSettings(); renderSettings(); }
 function applySettings(){ applyTheme(settings.theme); applyFont(settings.font); renderSettings(); }
+function copyAppLink(){
+  const el=document.getElementById('appLink'); const v=el.value;
+  if(navigator.clipboard && navigator.clipboard.writeText){ navigator.clipboard.writeText(v).then(()=>toast('🔗 Ссылка скопирована')).catch(()=>{ el.select(); try{document.execCommand('copy'); toast('🔗 Ссылка скопирована');}catch(e){ toast('Выделите и скопируйте ссылку'); } }); }
+  else { el.select(); try{document.execCommand('copy'); toast('🔗 Ссылка скопирована');}catch(e){ toast('Выделите и скопируйте ссылку'); } }
+}
 
 /* ============ ДОКУМЕНТЫ: выбор + генерация черновика ============ */
 let pickedDoc='claim';
