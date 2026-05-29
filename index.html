@@ -116,6 +116,30 @@ textarea{min-height:74px;}
 .media-btn:active{background:var(--accent-soft);border-color:var(--accent);}
 .media-btn .ic{font-size:21px;display:block;margin-bottom:3px;}
 .media-btn.tagged{border-color:var(--green);color:var(--green);}
+.media-btn.rec{border-color:var(--red);color:var(--red);animation:recpulse 1s infinite;}
+@keyframes recpulse{50%{opacity:.5;}}
+.media-prev{display:flex;flex-wrap:wrap;gap:8px;margin:2px 0 4px;}
+.thumb{position:relative;width:62px;height:62px;border-radius:9px;overflow:hidden;border:1px solid var(--line);}
+.thumb img{width:100%;height:100%;object-fit:cover;display:block;}
+.thumb .rm{position:absolute;top:2px;right:2px;width:18px;height:18px;border-radius:50%;background:rgba(0,0,0,.6);color:#fff;font-size:11px;line-height:18px;text-align:center;cursor:pointer;}
+.voice-prev{display:flex;align-items:center;gap:10px;margin:2px 0 4px;}
+.voice-prev audio{flex:1;height:34px;}
+.voice-prev .rm{color:var(--red);cursor:pointer;font-size:12px;white-space:nowrap;}
+.note-media{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px;}
+.note-media img{width:64px;height:64px;object-fit:cover;border-radius:8px;border:1px solid var(--line);}
+.note-media audio{width:100%;height:32px;margin-top:6px;}
+/* settings */
+.opt-row{display:flex;gap:8px;flex-wrap:wrap;margin:6px 0 14px;}
+.opt{flex:1;min-width:calc(33% - 6px);background:var(--bg2);border:1px solid var(--line);border-radius:10px;padding:10px 8px;text-align:center;font-size:13px;cursor:pointer;color:var(--txt);transition:.15s;}
+.opt.sel{border-color:var(--accent);color:var(--accent2);background:var(--accent-soft);font-weight:600;}
+.sw-pal{display:flex;gap:5px;justify-content:center;margin-bottom:6px;}
+.sw{width:15px;height:15px;border-radius:50%;border:1px solid rgba(128,128,128,.35);}
+.instr{font-size:13.5px;line-height:1.6;color:var(--muted);}
+.instr b{color:var(--txt);}
+.instr li{margin:5px 0;}
+/* docs */
+.chip{display:inline-block;background:var(--bg2);border:1px solid var(--line);border-radius:9px;padding:9px 12px;margin:0 6px 8px 0;font-size:13px;cursor:pointer;color:var(--txt);transition:.15s;}
+.chip.sel{border-color:var(--accent);background:var(--accent-soft);color:var(--accent2);font-weight:600;}
 
 .btn{
   display:block;width:100%;background:var(--accent);color:#fff;border:none;
@@ -266,9 +290,13 @@ textarea{min-height:74px;}
         </select>
 
         <div class="media-row" style="margin-top:13px;">
-          <div class="media-btn" id="mbPhoto" onclick="tagMedia('mbPhoto','📷 Фото · 2')"><span class="ic">📷</span>Фото</div>
-          <div class="media-btn" id="mbVoice" onclick="tagMedia('mbVoice','🎤 Голос · 0:14')"><span class="ic">🎤</span>Голос</div>
+          <div class="media-btn" id="mbPhoto" onclick="document.getElementById('photoInput').click()"><span class="ic">📷</span>Фото</div>
+          <div class="media-btn" id="mbVoice" onclick="toggleVoice()"><span class="ic">🎤</span>Голос</div>
         </div>
+        <input type="file" id="photoInput" accept="image/*" capture="environment" multiple style="display:none" onchange="addPhotos(this.files)">
+        <input type="file" id="voiceInput" accept="audio/*" style="display:none" onchange="addVoiceFile(this.files)">
+        <div class="media-prev" id="photoPrev"></div>
+        <div class="voice-prev" id="voicePrev" style="display:none"></div>
 
         <label class="fld">Описание дефекта</label>
         <textarea id="skText" placeholder="трещина на потолке…"></textarea>
@@ -310,6 +338,68 @@ textarea{min-height:74px;}
         <div style="font-size:13px;color:var(--muted);line-height:1.5;">Отсутствие актов осмотра/дефектов на руках тормозит и претензии, и общение с клиентом. Формируется в один тап из карточки заявки.</div>
       </div>
       <div id="actList" style="margin-top:12px;"></div>
+    </section>
+
+    <!-- ===== SCREEN: DOCUMENTS ===== -->
+    <section class="screen" id="s-docs">
+      <div class="sec-h">🗂 Документы · Запрос</div>
+      <div class="card">
+        <label class="fld">Тип документа</label>
+        <div id="docTypes" style="margin-bottom:6px;">
+          <span class="chip sel" data-v="claim" onclick="pickDoc('claim')">✉️ Претензия</span>
+          <span class="chip" data-v="actdef" onclick="pickDoc('actdef')">📄 Акт дефектов</span>
+          <span class="chip" data-v="actins" onclick="pickDoc('actins')">🔍 Акт осмотра</span>
+          <span class="chip" data-v="notice" onclick="pickDoc('notice')">🔔 Уведомление</span>
+        </div>
+        <label class="fld">Объект</label>
+        <select id="docFlat">
+          <optgroup label="Дом 2"><option>Дом 2 · кв. 92</option><option>Дом 2 · кв. 16</option></optgroup>
+          <optgroup label="Дом 3"><option>Дом 3 · кв. 7</option></optgroup>
+          <optgroup label="Дом 1"><option>Дом 1 · кв. 12</option></optgroup>
+        </select>
+        <label class="fld" style="margin-top:11px;">Раздел работ</label>
+        <select id="docSection"><option>Кровля</option><option>Окна ПВХ</option><option>Базовая отделка</option><option>Лифты</option></select>
+        <label class="fld" style="margin-top:11px;">Суть / детали (текст или голос)</label>
+        <textarea id="docText" placeholder="опишите дефект и требования…"></textarea>
+        <div class="media-row" style="margin-top:11px;">
+          <div class="media-btn" id="mbDocVoice" onclick="toggleDocVoice()"><span class="ic">🎤</span>Голос</div>
+        </div>
+        <input type="file" id="docVoiceInput" accept="audio/*" style="display:none" onchange="addDocVoiceFile(this.files)">
+        <div class="voice-prev" id="docVoicePrev" style="display:none"></div>
+        <button class="btn" style="margin-top:12px;" onclick="genDocReq()">Сформировать черновик</button>
+      </div>
+      <div class="doc hidden" id="docReqOut"></div>
+      <button class="btn hidden" id="docSendBtn" style="margin-top:8px;" onclick="sendDocToBot()">📨 В бот для скачивания (.docx)</button>
+      <div class="role-foot" style="margin-top:6px;">🎤 голос расшифровывается на сервере · итоговый .docx прилетает в бот</div>
+    </section>
+
+    <!-- ===== SCREEN: SETTINGS ===== -->
+    <section class="screen" id="s-settings">
+      <div class="sec-h">⚙️ Настройки</div>
+      <div class="card">
+        <label class="fld">Цветовая гамма</label>
+        <div class="opt-row" id="setThemes">
+          <div class="opt" data-v="tg" onclick="setTheme('tg')"><div class="sw-pal"><span class="sw" style="background:#17212b"></span><span class="sw" style="background:#8774e1"></span></div>Telegram</div>
+          <div class="opt" data-v="les" onclick="setTheme('les')"><div class="sw-pal"><span class="sw" style="background:#576045"></span><span class="sw" style="background:#e4b64f"></span></div>ЛЕС</div>
+          <div class="opt" data-v="contrast" onclick="setTheme('contrast')"><div class="sw-pal"><span class="sw" style="background:#000"></span><span class="sw" style="background:#ffd84d"></span></div>Контраст</div>
+        </div>
+        <label class="fld">Размер шрифта</label>
+        <div class="opt-row" id="setFonts">
+          <div class="opt" data-v="small" onclick="setFont('small')">A− Мелкий</div>
+          <div class="opt" data-v="normal" onclick="setFont('normal')">A Обычный</div>
+          <div class="opt" data-v="large" onclick="setFont('large')">A+ Крупный</div>
+        </div>
+      </div>
+      <div class="card">
+        <div class="sec-h" style="margin-top:0;">📖 Как пользоваться</div>
+        <ul class="instr" style="padding-left:18px;margin:0;">
+          <li><b>Заявки</b> — гарантийные обращения по Стандарту-2026: статус → шаг → срок.</li>
+          <li><b>Документы</b> — выберите тип, опишите ситуацию (текст или голос) → получите черновик.</li>
+          <li><b>Подрядчики</b> — база с договорами и сроками гарантии.</li>
+          <li><b>Дефект</b> — зафиксируйте замечание с фото и голосом прямо на объекте.</li>
+          <li>Открыть приложение: кнопка <b>«Гарантия ИИ»</b> внизу чата с ботом.</li>
+        </ul>
+      </div>
     </section>
 
   </main>
@@ -371,7 +461,7 @@ async function loadData() {
     apiGet('/requests', DEMO_REQUESTS),
     apiGet('/contractors', DEMO_CONTRACTORS),
     apiGet('/acts', DEMO_ACTS),
-    apiGet('/notes', DEMO_NOTES),
+    apiGet('/notes', NOTES),
   ]);
   REQUESTS = reqs; CONTRACTORS = cons; ACTS = acts; NOTES = notes;
   renderRequests(); renderContractors(); renderActs(); renderNotes();
@@ -426,7 +516,7 @@ const DEMO_ACTS = [
 ];
 
 // Рабочие копии — стартуют от demo, обновляются loadData() из API при наличии бэка
-let NOTES = DEMO_NOTES.slice();
+let NOTES = loadNotes();
 let REQUESTS = DEMO_REQUESTS.slice();
 let CONTRACTORS = DEMO_CONTRACTORS.slice();
 let ACTS = DEMO_ACTS.slice();
@@ -436,9 +526,11 @@ let ACTS = DEMO_ACTS.slice();
 // Карточка заявки (s-gr-detail) относится к вкладке «Заявки».
 const TABS = [
   {ic:"📋",label:"Заявки",screen:"s-gr-list",match:["s-gr-list","s-gr-detail"]},
-  {ic:"👷",label:"Подрядчики",screen:"s-gr-contractors"},
+  {ic:"🗂",label:"Док-ты",screen:"s-docs"},
+  {ic:"👷",label:"Подряд.",screen:"s-gr-contractors"},
   {ic:"📄",label:"Акты",screen:"s-gr-acts"},
   {ic:"🛠",label:"Дефект",screen:"s-sk-new",match:["s-sk-new","s-sk-hist"]},
+  {ic:"⚙️",label:"Настр.",screen:"s-settings"},
 ];
 
 function show(id){
@@ -471,12 +563,19 @@ function badge(st){const b=BADGE[st];return '<span class="badge '+b[0]+'">'+b[1]
 function renderNotes(){
   const el=document.getElementById('skList');
   if(!NOTES.length){el.innerHTML='<div class="empty">Пока нет замечаний</div>';return;}
-  el.innerHTML=NOTES.map(n=>(
-    '<div class="item">'+
+  el.innerHTML=NOTES.map(n=>{
+    let media='';
+    if(n.photos&&n.photos.length){
+      media+='<div class="note-media">'+n.photos.map(src=>'<img src="'+src+'">').join('')+'</div>';
+    }
+    if(n.voice){
+      media+='<audio controls src="'+n.voice+'"></audio>';
+    }
+    return '<div class="item">'+
       '<div class="top"><div class="ttl">'+n.flat+'</div>'+badge(n.status)+'<div class="date">'+n.date+'</div></div>'+
-      '<div class="desc">'+n.text+'</div>'+
-    '</div>'
-  )).join('');
+      '<div class="desc">'+n.text+'</div>'+media+
+    '</div>';
+  }).join('');
 }
 
 /* ============ RENDER: GR REQUESTS ============ */
@@ -753,11 +852,98 @@ function renderActs(){
 }
 
 /* ============ ACTIONS ============ */
-function tagMedia(id,label){
-  const b=document.getElementById(id);
-  b.classList.toggle('tagged');
-  // visual hint only
-  toast(b.classList.contains('tagged')?(label+' прикреплено'):'Вложение убрано');
+/* ===== Фиксация дефекта: реальные фото + голос ===== */
+let pendingPhotos = [];   // массив dataURL (сжатые)
+let pendingVoice  = null; // dataURL аудио
+let mediaRecorder = null, recChunks = [], recStream = null;
+
+function fileToDataURL(file){
+  return new Promise((res,rej)=>{const r=new FileReader();r.onload=()=>res(r.result);r.onerror=rej;r.readAsDataURL(file);});
+}
+// Сжать фото с телефона до разумного размера, чтобы не забивать localStorage
+function downscaleImage(file, maxDim, quality){
+  return new Promise((res)=>{
+    const img=new Image();
+    img.onload=()=>{
+      let w=img.width, h=img.height;
+      if(w>maxDim||h>maxDim){
+        if(w>h){ h=Math.round(h*maxDim/w); w=maxDim; } else { w=Math.round(w*maxDim/h); h=maxDim; }
+      }
+      const c=document.createElement('canvas'); c.width=w; c.height=h;
+      c.getContext('2d').drawImage(img,0,0,w,h);
+      URL.revokeObjectURL(img.src);
+      try{ res(c.toDataURL('image/jpeg', quality)); }catch(e){ res(null); }
+    };
+    img.onerror=()=>res(null);
+    img.src=URL.createObjectURL(file);
+  });
+}
+async function addPhotos(files){
+  for(const f of files){
+    if(!f.type.startsWith('image/')) continue;
+    let url=await downscaleImage(f,1280,0.7);
+    if(!url){ try{ url=await fileToDataURL(f); }catch(e){ url=null; } }
+    if(url) pendingPhotos.push(url);
+  }
+  renderPhotoPrev();
+  document.getElementById('photoInput').value='';
+}
+function renderPhotoPrev(){
+  const el=document.getElementById('photoPrev');
+  el.innerHTML=pendingPhotos.map((src,i)=>'<div class="thumb"><img src="'+src+'"><div class="rm" onclick="rmPhoto('+i+')">✕</div></div>').join('');
+  document.getElementById('mbPhoto').classList.toggle('tagged', pendingPhotos.length>0);
+}
+function rmPhoto(i){ pendingPhotos.splice(i,1); renderPhotoPrev(); }
+
+async function toggleVoice(){
+  if(mediaRecorder && mediaRecorder.state==='recording'){ stopRec(); return; }
+  if(pendingVoice){ toast('Голос уже записан — удалите, чтобы перезаписать'); return; }
+  if(!navigator.mediaDevices || !window.MediaRecorder){
+    document.getElementById('voiceInput').click(); // фолбэк: выбрать аудиофайл
+    return;
+  }
+  try{ recStream = await navigator.mediaDevices.getUserMedia({audio:true}); }
+  catch(e){ toast('Нет доступа к микрофону — выберите аудиофайл'); document.getElementById('voiceInput').click(); return; }
+  recChunks=[];
+  mediaRecorder = new MediaRecorder(recStream);
+  mediaRecorder.ondataavailable = e=>{ if(e.data.size>0) recChunks.push(e.data); };
+  mediaRecorder.onstop = async ()=>{
+    const blob = new Blob(recChunks, {type: recChunks[0]?recChunks[0].type:'audio/webm'});
+    try{ pendingVoice = await fileToDataURL(blob); }catch(e){ pendingVoice=null; }
+    if(recStream){ recStream.getTracks().forEach(t=>t.stop()); recStream=null; }
+    renderVoicePrev();
+  };
+  mediaRecorder.start();
+  const b=document.getElementById('mbVoice');
+  b.classList.add('rec'); b.innerHTML='<span class="ic">⏹</span>Стоп';
+  toast('🎤 Запись… нажмите ещё раз, чтобы остановить');
+}
+function stopRec(){
+  try{ mediaRecorder.stop(); }catch(e){}
+  const b=document.getElementById('mbVoice');
+  b.classList.remove('rec'); b.innerHTML='<span class="ic">🎤</span>Голос';
+}
+async function addVoiceFile(files){
+  if(files && files[0]){ try{ pendingVoice=await fileToDataURL(files[0]); }catch(e){} renderVoicePrev(); }
+  document.getElementById('voiceInput').value='';
+}
+function renderVoicePrev(){
+  const el=document.getElementById('voicePrev');
+  if(!pendingVoice){ el.style.display='none'; el.innerHTML=''; document.getElementById('mbVoice').classList.remove('tagged'); return; }
+  el.style.display='flex';
+  el.innerHTML='<audio controls src="'+pendingVoice+'"></audio><span class="rm" onclick="rmVoice()">✕ удалить</span>';
+  document.getElementById('mbVoice').classList.add('tagged');
+}
+function rmVoice(){ pendingVoice=null; renderVoicePrev(); }
+
+/* Сохранение заметок локально (переживает перезагрузку; на проде уедет в БД) */
+function persistNotes(){
+  try{ localStorage.setItem('garantia_notes', JSON.stringify(NOTES)); }
+  catch(e){ toast('⚠️ Память браузера переполнена — часть фото не сохранится'); }
+}
+function loadNotes(){
+  try{ const s=localStorage.getItem('garantia_notes'); if(s) return JSON.parse(s); }catch(e){}
+  return DEMO_NOTES.slice();
 }
 
 /* Собрать пакет документов по заявке и отправить в Telegram (ключевая фича, §3 плана) */
@@ -779,15 +965,18 @@ async function sendPackage(i){
 function saveNote(){
   const flat=document.getElementById('skFlat').value;
   const text=document.getElementById('skText').value.trim();
-  if(!text){toast('Введите описание дефекта');return;}
+  if(!text && !pendingPhotos.length && !pendingVoice){ toast('Добавьте описание, фото или голос'); return; }
+  if(mediaRecorder && mediaRecorder.state==='recording'){ stopRec(); }
   const now=new Date();
   const dd=String(now.getDate()).padStart(2,'0')+'.'+String(now.getMonth()+1).padStart(2,'0')+'.'+now.getFullYear();
-  NOTES.unshift({flat,date:dd,status:'new',text});
+  NOTES.unshift({flat,date:dd,status:'new',text:text||'(без описания)',photos:pendingPhotos.slice(),voice:pendingVoice});
+  persistNotes();
   renderNotes();
+  // сброс формы
   document.getElementById('skText').value='';
-  document.getElementById('mbPhoto').classList.remove('tagged');
-  document.getElementById('mbVoice').classList.remove('tagged');
-  toast('✅ Замечание сохранено в Историю');
+  pendingPhotos=[]; pendingVoice=null;
+  renderPhotoPrev(); renderVoicePrev();
+  toast('✅ Дефект сохранён (фото/голос приложены)');
   show('s-sk-hist');
 }
 
@@ -799,12 +988,84 @@ function toast(msg){
   toastT=setTimeout(()=>t.classList.remove('show'),1900);
 }
 
+/* ============ НАСТРОЙКИ: тема + размер шрифта ============ */
+const THEMES = {
+  tg:{vars:{'--bg':'#17212b','--bg2':'#1d2a35','--card':'#202b36','--card2':'#243240','--line':'#2b3a47','--txt':'#e9edf0','--muted':'#8696a7','--muted2':'#6b7d8d','--accent':'#8774e1','--accent2':'#9d8cf0','--accent-soft':'rgba(135,116,225,.16)'}},
+  les:{vars:{'--bg':'#f7f7f7','--bg2':'#eef0e8','--card':'#ffffff','--card2':'#f1f3ec','--line':'#dde1d3','--txt':'#2e3425','--muted':'#6b7256','--muted2':'#9aa07f','--accent':'#576045','--accent2':'#b8902f','--accent-soft':'rgba(228,182,79,.2)'}},
+  contrast:{vars:{'--bg':'#000000','--bg2':'#0d0d0d','--card':'#141414','--card2':'#1c1c1c','--line':'#3a3a3a','--txt':'#ffffff','--muted':'#cfcfcf','--muted2':'#a8a8a8','--accent':'#ffd84d','--accent2':'#ffe680','--accent-soft':'rgba(255,216,77,.2)'}}
+};
+const FONTS = {small:0.92, normal:1, large:1.12};
+let settings = (function(){ try{ return JSON.parse(localStorage.getItem('garantia_settings'))||{theme:'tg',font:'normal'}; }catch(e){ return {theme:'tg',font:'normal'}; } })();
+function saveSettings(){ try{ localStorage.setItem('garantia_settings', JSON.stringify(settings)); }catch(e){} }
+function applyTheme(name){ const t=THEMES[name]; if(!t) return; const r=document.documentElement.style; for(const k in t.vars) r.setProperty(k, t.vars[k]); settings.theme=name; }
+function applyFont(size){ document.getElementById('app').style.zoom = FONTS[size]||1; settings.font=size; }
+function renderSettings(){
+  document.querySelectorAll('#setThemes .opt').forEach(o=>o.classList.toggle('sel', o.dataset.v===settings.theme));
+  document.querySelectorAll('#setFonts .opt').forEach(o=>o.classList.toggle('sel', o.dataset.v===settings.font));
+}
+function setTheme(name){ applyTheme(name); saveSettings(); renderSettings(); }
+function setFont(size){ applyFont(size); saveSettings(); renderSettings(); }
+function applySettings(){ applyTheme(settings.theme); applyFont(settings.font); renderSettings(); }
+
+/* ============ ДОКУМЕНТЫ: выбор + генерация черновика ============ */
+let pickedDoc='claim';
+let pendingDocVoice=null;
+function pickDoc(v){ pickedDoc=v; document.querySelectorAll('#docTypes .chip').forEach(c=>c.classList.toggle('sel', c.dataset.v===v)); }
+async function toggleDocVoice(){
+  const b=document.getElementById('mbDocVoice');
+  if(mediaRecorder && mediaRecorder.state==='recording'){ try{mediaRecorder.stop();}catch(e){} b.classList.remove('rec'); b.innerHTML='<span class="ic">🎤</span>Голос'; return; }
+  if(pendingDocVoice){ toast('Голос уже записан — удалите, чтобы перезаписать'); return; }
+  if(!navigator.mediaDevices || !window.MediaRecorder){ document.getElementById('docVoiceInput').click(); return; }
+  try{ recStream = await navigator.mediaDevices.getUserMedia({audio:true}); }
+  catch(e){ toast('Нет доступа к микрофону — выберите аудиофайл'); document.getElementById('docVoiceInput').click(); return; }
+  recChunks=[]; mediaRecorder=new MediaRecorder(recStream);
+  mediaRecorder.ondataavailable=e=>{ if(e.data.size>0) recChunks.push(e.data); };
+  mediaRecorder.onstop=async()=>{ const blob=new Blob(recChunks,{type:recChunks[0]?recChunks[0].type:'audio/webm'}); try{ pendingDocVoice=await fileToDataURL(blob); }catch(e){} if(recStream){recStream.getTracks().forEach(t=>t.stop());recStream=null;} renderDocVoice(); };
+  mediaRecorder.start(); b.classList.add('rec'); b.innerHTML='<span class="ic">⏹</span>Стоп';
+  toast('🎤 Запись… нажмите ещё раз, чтобы остановить');
+}
+async function addDocVoiceFile(files){ if(files&&files[0]){ try{ pendingDocVoice=await fileToDataURL(files[0]); }catch(e){} renderDocVoice(); } document.getElementById('docVoiceInput').value=''; }
+function renderDocVoice(){
+  const el=document.getElementById('docVoicePrev');
+  if(!pendingDocVoice){ el.style.display='none'; el.innerHTML=''; document.getElementById('mbDocVoice').classList.remove('tagged'); return; }
+  el.style.display='flex';
+  el.innerHTML='<audio controls src="'+pendingDocVoice+'"></audio><span class="rm" onclick="rmDocVoice()">✕ удалить</span>';
+  document.getElementById('mbDocVoice').classList.add('tagged');
+}
+function rmDocVoice(){ pendingDocVoice=null; renderDocVoice(); }
+function genDocReq(){
+  const flat=document.getElementById('docFlat').value;
+  const section=document.getElementById('docSection').value;
+  const details=document.getElementById('docText').value.trim();
+  if(!details && !pendingDocVoice){ toast('Опишите ситуацию: текст или голос'); return; }
+  const today='29.05.2026';
+  const norms=normsFor(section);
+  const titleMap={claim:'✉️ ПРЕТЕНЗИЯ (черновик)',actdef:'📄 АКТ ВЫЯВЛЕННЫХ ДЕФЕКТОВ (черновик)',actins:'🔍 АКТ ОСМОТРА (черновик)',notice:'🔔 УВЕДОМЛЕНИЕ ПОДРЯДЧИКУ (черновик)'};
+  let body=
+    'Объект: '+flat+' · раздел «'+section+'»\n'+
+    ZASTROYSCHIK.short+', '+ZASTROYSCHIK.city+'\n'+
+    'Дата: '+today+'\n'+
+    '══════════════════════════════════════\n'+
+    'СУТЬ ОБРАЩЕНИЯ:\n  '+(details||'[будет расшифровано из голосового сообщения на сервере]')+'\n\n'+
+    'ПРАВОВОЕ ОБОСНОВАНИЕ (раздел «'+section+'»):\n'+numberedList(norms.slice(0,4),'  ')+'\n\n'+
+    'ТРЕБОВАНИЯ: безвозмездно устранить выявленные недостатки в гарантийный срок согласно договору подряда; применимо: '+warrCtx(section)+'.\n\n'+
+    ZASTROYSCHIK.engineer+'\n_______________ / подпись, дата\n\n[ПДн дольщика обезличены по ФЗ-152: [КЛИЕНТ], [АДРЕС]]';
+  if(pendingDocVoice) body+='\n\n🎤 приложено голосовое сообщение (расшифровка на сервере).';
+  const out=document.getElementById('docReqOut');
+  out.innerHTML='<div class="doc-h">'+titleMap[pickedDoc]+'</div>'+body;
+  out.classList.remove('hidden');
+  document.getElementById('docSendBtn').classList.remove('hidden');
+  out.scrollIntoView({behavior:'smooth',block:'nearest'});
+}
+function sendDocToBot(){ toast('📨 Demo: на проде .docx сформируется на сервере и прилетит в бот для скачивания'); }
+
 /* ============ INIT ============ */
 renderNotes();
 renderRequests();
 renderContractors();
 renderActs();
 buildTabbar();
+applySettings();   // тема + размер шрифта из localStorage
 show('s-gr-list'); // МВП открывается сразу на списке заявок
 loadData();        // обновит данные из API, если бэкенд доступен (иначе остаётся demo)
 
